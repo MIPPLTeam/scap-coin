@@ -49,11 +49,12 @@ static Checkpoints::MapCheckpoints mapCheckpoints =
     (455, uint256("0cb023398ff879c497dff568b558029e0fd2614750448e1c5e7c2e213d077b93"))   
     (3335, uint256("242ba8255f4be2fb878cdbcd7ad7748394e1e82034c21adc36fde3be4edf3529"))    
     (44860, uint256("1909e1099507e45324213da2619ee896539e2e68d92f43ba1f163796682c846c"))     
-    (103100, uint256("dcf864e07fe3e6b7da064d02ef4a464b27d162784a84f9b30f8ff2c6b12ac3f6"));    
+    (103100, uint256("dcf864e07fe3e6b7da064d02ef4a464b27d162784a84f9b30f8ff2c6b12ac3f6"))  
+    (291374, uint256("9f8496c964308f02a992e606565a6e8fac4a9c9d3732448cf85dcc88a98ecff2"));	
 static const Checkpoints::CCheckpointData data = {
     &mapCheckpoints,
-    1579683683,   // * UNIX timestamp of last checkpoint block
-    213985,        // * total number of transactions between genesis and last checkpoint (the tx=... number in the SetBestChain debug.log lines)
+    1591121697,   // * UNIX timestamp of last checkpoint block
+    614793,        // * total number of transactions between genesis and last checkpoint (the tx=... number in the SetBestChain debug.log lines)
     2000          // * estimated number of transactions per day after checkpoint
 };
 
@@ -100,6 +101,7 @@ public:
         nMaturity = 100;
         nCollateralMaturity = 525600;
         nCollateralMaturityEnforcementHeight = 1000;
+        nCollateralMaturityTimeWindow = 60 * 24 * 5;
         nMasternodeCountDrift = 20;
         nModifierUpdateBlock = 1;
         nMaxMoneyOut = 10100000 * COIN;
@@ -135,9 +137,9 @@ public:
         base58Prefixes[PUBKEY_ADDRESS] = std::vector<unsigned char>(1, 28); // Safecapital addresses start with 'C'
         base58Prefixes[SCRIPT_ADDRESS] = std::vector<unsigned char>(1, 10); // Safecapital script addresses start with '5'
         base58Prefixes[SECRET_KEY] = std::vector<unsigned char>(1, 135);    // Safecapital private keys start with 'w'
-		// SafeCapital BIP32 pubkeys start with 'xpub' (Bitcoin defaults)
+        // SafeCapital BIP32 pubkeys start with 'xpub' (Bitcoin defaults)
         base58Prefixes[EXT_PUBLIC_KEY] = boost::assign::list_of(0x04)(0x88)(0xB2)(0x1E).convert_to_container<std::vector<unsigned char> >();
-		// SafeCapital BIP32 pubkeys start with 'xprv' (Bitcoin defaults)		
+        // SafeCapital BIP32 pubkeys start with 'xprv' (Bitcoin defaults)		
         base58Prefixes[EXT_SECRET_KEY] = boost::assign::list_of(0x04)(0x88)(0xAD)(0xE4).convert_to_container<std::vector<unsigned char> >();
         // 	BIP44 coin type is '0X80000a00' from https://github.com/satoshilabs/slips/blob/master/slip-0044.md
         base58Prefixes[EXT_COIN_TYPE] = boost::assign::list_of(0x80)(0x00)(0x0a)(0x00).convert_to_container<std::vector<unsigned char> >();
@@ -193,6 +195,7 @@ public:
         nMaturity = 100;
         nCollateralMaturity = 300;
         nCollateralMaturityEnforcementHeight = 1000;
+        nCollateralMaturityTimeWindow = 300;
         nMasternodeCountDrift = 4;
         nModifierUpdateBlock = 1; //approx Mon, 17 Apr 2017 04:00:00 GMT
         nMaxMoneyOut = 43199500 * COIN;
@@ -381,4 +384,14 @@ bool SelectParamsFromCommandLine()
 
     SelectParams(network);
     return true;
+}
+
+bool CChainParams::nonCollateralMaturity(int nTxHeight) const {
+
+   int nDiv = nTxHeight / nCollateralMaturity;
+   int nRem = nTxHeight % nCollateralMaturity;
+
+   if(nDiv >= 1 && nRem <= nCollateralMaturityTimeWindow)
+       return false;
+   return true;
 }

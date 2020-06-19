@@ -1,7 +1,7 @@
 
 ## Single masternode on Linux VPS + cold control wallet on local PC
 ------
-This guide is for a single masternode, on a Ubuntu 16.04 64bit server(1GB RAM) and will be controlled from the wallet on your local computer.
+This guide is for a single masternode, on a Ubuntu 16.04 64bit or on Ubuntu 18.04 64bit server(1GB RAM) and will be controlled from the wallet on your local computer.
 
 First the basic requirements:
 * 1001 SCAP (https://www.bitscap.com/Trade/index/market/scap_btc)
@@ -17,7 +17,7 @@ For this guide, I’m going to refer to your main computer’s wallet as the mai
 
 ### I. Deploy VPS and configuration
 
-1. Get a VPS server with min. 1GB RAM and Ubuntu 16.04 as operating system
+1. Get a VPS server with min. 1GB RAM and Ubuntu 16.04 or Ubuntu 18.04 as operating system
 2. Get PUTTY for your operating system from https://www.putty.org
     * Always use mouse selection for COPY text from PUTTY to WINDOWS
     * Always use right button click for PASTE text in PUTTY from WINDOWS

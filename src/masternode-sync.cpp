@@ -144,6 +144,10 @@ void CMasternodeSync::GetNextAsset()
         break;
     case (MASTERNODE_SYNC_SPORKS):
         RequestedMasternodeAssets = MASTERNODE_SYNC_LIST;
+        if (fLiteMode) {
+            LogPrintf("CMasternodeSync::GetNextAsset - Sync sporks has finished\n");
+            RequestedMasternodeAssets = MASTERNODE_SYNC_FINISHED;
+        }
         break;
     case (MASTERNODE_SYNC_LIST):
         RequestedMasternodeAssets = MASTERNODE_SYNC_MNW;
@@ -225,6 +229,7 @@ void CMasternodeSync::ClearFulfilledRequest()
 
     BOOST_FOREACH (CNode* pnode, vNodes) {
         pnode->ClearFulfilledRequest("getspork");
+        if (fLiteMode) continue;
         pnode->ClearFulfilledRequest("mnsync");
         pnode->ClearFulfilledRequest("mnwsync");
         pnode->ClearFulfilledRequest("busync");
@@ -241,7 +246,7 @@ void CMasternodeSync::Process()
         /* 
             Resync if we lose all masternodes from sleep/wake or failure to sync originally
         */
-        if (mnodeman.CountEnabled() == 0) {
+        if (!fLiteMode && mnodeman.CountEnabled() == 0) {
             Reset();
         } else
             return;
@@ -295,6 +300,8 @@ void CMasternodeSync::Process()
             return;
         }
 
+        if (fLiteMode) continue;
+        
         if (pnode->nVersion >= masternodePayments.GetMinMasternodePaymentsProto()) {
             if (RequestedMasternodeAssets == MASTERNODE_SYNC_LIST) {
                 LogPrint("masternode", "CMasternodeSync::Process() - lastMasternodeList %lld (GetTime() - MASTERNODE_SYNC_TIMEOUT) %lld\n", lastMasternodeList, GetTime() - MASTERNODE_SYNC_TIMEOUT);

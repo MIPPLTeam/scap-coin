@@ -321,7 +321,8 @@ CBlockTemplate* CreateNewBlock(const CScript& scriptPubKeyIn, CWallet* pwallet, 
 
         nLastBlockTx = nBlockTx;
         nLastBlockSize = nBlockSize;
-        LogPrintf("CreateNewBlock(): total size %u\n", nBlockSize);
+        if (fDebug && GetBoolArg("-printcoinstake", false))
+            LogPrintf("CreateNewBlock(): total size %u\n", nBlockSize);
 
 
         // Compute final coinbase transaction.
@@ -399,9 +400,10 @@ CBlockTemplate* CreateNewBlockWithKey(CReserveKey& reservekey, CWallet* pwallet)
 
 bool ProcessBlockFound(CBlock* pblock, CWallet& wallet, CReserveKey& reservekey)
 {
-    LogPrintf("%s\n", pblock->ToString());
-    LogPrintf("generated %s\n", FormatMoney(pblock->vtx[0].vout[0].nValue));
-
+    if (fDebug && GetBoolArg("-printcoinstake", false)) {
+        LogPrintf("%s\n", pblock->ToString());
+    }
+    
     // Found a solution
     {
         LOCK(cs_main);
@@ -422,7 +424,7 @@ bool ProcessBlockFound(CBlock* pblock, CWallet& wallet, CReserveKey& reservekey)
     CValidationState state;
     if (!ProcessNewBlock(state, NULL, pblock))
         return error("SafeCapitalMiner : ProcessNewBlock, block not accepted");
-
+    
     return true;
 }
 
@@ -491,14 +493,16 @@ void BitcoinMiner(CWallet* pwallet, bool fProofOfStake)
 
         //Stake miner main
         if (fProofOfStake) {
-            LogPrintf("CPUMiner : proof-of-stake block found %s \n", pblock->GetHash().ToString().c_str());
+            if (fDebug && GetBoolArg("-printcoinstake", false))
+                LogPrintf("CPUMiner : proof-of-stake block found %s \n", pblock->GetHash().ToString().c_str());
 
             if (!pblock->SignBlock(*pwallet)) {
                 LogPrintf("BitcoinMiner(): Signing new block failed \n");
                 continue;
             }
-
-            LogPrintf("CPUMiner : proof-of-stake block was signed %s \n", pblock->GetHash().ToString().c_str());
+            if (fDebug && GetBoolArg("-printcoinstake", false))
+                LogPrintf("CPUMiner : proof-of-stake block was signed %s \n", pblock->GetHash().ToString().c_str());
+            LogPrintf("POS block found %s\n", pblock->GetHash().ToString().c_str());
             SetThreadPriority(THREAD_PRIORITY_NORMAL);
             ProcessBlockFound(pblock, *pwallet, reservekey);
             SetThreadPriority(THREAD_PRIORITY_LOWEST);

@@ -51,6 +51,12 @@ static const CAmount DEFAULT_TRANSACTION_MAXFEE = 10 * COIN;
 //! -maxtxfee will warn if called with a higher fee than this amount (in satoshis)
 static const CAmount nHighTransactionMaxFeeWarning = 100 * nHighTransactionFeeWarning;
 
+// combine/split address amount
+static const unsigned int GetStakeMaxCombineInputs = 40;
+static const int64_t GetStakeCombineThreshold =  5 * COIN;
+static const unsigned int GetStakeSplitOutputs = 2;
+static const int64_t GetStakeSplitThreshold = 200 * COIN;
+
 class CAccountingEntry;
 class CCoinControl;
 class COutput;

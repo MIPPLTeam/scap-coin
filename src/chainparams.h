@@ -100,7 +100,9 @@ public:
     /** Staking Requirements */
     int Stake_MinConfirmations() const { return nStakeMinConfirmations; }
     CAmount Stake_MinAmount() const { return nStakeMinAmount; }
-
+    /** Masternode Requirements */
+    bool nonCollateralMaturity(int nTxHeight) const;
+    
 protected:
     CChainParams() {}
 
@@ -122,6 +124,7 @@ protected:
     int nMaturity;
     int nCollateralMaturity;
     int nCollateralMaturityEnforcementHeight;
+	int nCollateralMaturityTimeWindow;
     int nModifierUpdateBlock;
     CAmount nMaxMoneyOut;
 	double nMasternodeCollateral;

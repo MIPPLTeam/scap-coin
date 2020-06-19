@@ -2286,7 +2286,7 @@ void CPrivatesendPool::RelayCompletedTransaction(const int sessionID, const bool
 //TODO: Rename/move to core
 void ThreadCheckPrivateSendPool()
 {
-    if (fLiteMode) return; //disable all Privatesend/Masternode related functionality
+    //if (fLiteMode) return; //disable all Privatesend/Masternode related functionality
 
     // Make this thread recognisable as the wallet flushing thread
     RenameThread("safecapital-privatesend");
@@ -2300,7 +2300,7 @@ void ThreadCheckPrivateSendPool()
         // try to sync from all available nodes, one step at a time
         masternodeSync.Process();
 
-        if (masternodeSync.IsBlockchainSynced()) {
+        if (masternodeSync.IsBlockchainSynced() && !fLiteMode) {
             c++;
 
             // check if we should activate or ping every few minutes,
@@ -2313,8 +2313,6 @@ void ThreadCheckPrivateSendPool()
                 masternodePayments.CleanPaymentList();
                 CleanTransactionLocksList();
             }
-
-            //if(c % MASTERNODES_DUMP_SECONDS == 0) DumpMasternodes();
 
             privateSendPool.CheckTimeout();
             privateSendPool.CheckForCompleteQueue();

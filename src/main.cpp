@@ -1746,7 +1746,7 @@ bool CheckInputs(const CTransaction& tx, CValidationState& state, const CCoinsVi
             // if prev is collateral amount, check that it's matured
             if (!isMasternode && coins->vout[prevout.n].nValue == Params().MasternodeCollateral())
             {
-                if (nSpendHeight - coins->nHeight < Params().COLLATERAL_MATURITY() && nSpendHeight > Params().CollateralMaturityEnforcementHeight())
+                if (Params().nonCollateralMaturity(nSpendHeight - coins->nHeight) && nSpendHeight > Params().CollateralMaturityEnforcementHeight())
                     return state.Invalid(
                              error("CheckInputs() : tried to spend collateral at depth %d", nSpendHeight - coins->nHeight),
                              REJECT_INVALID, "bad-txns-premature-spend-of-collateral");
@@ -4592,8 +4592,7 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv, 
         pfrom->fSuccessfullyConnected = true;
 
         string remoteAddr;
-        if (fLogIPs)
-            remoteAddr = ", peeraddr=" + pfrom->addr.ToString();
+        remoteAddr = ", peeraddr=" + pfrom->addr.ToString();
 
         LogPrintf("receive version message: %s: version %d, blocks=%d, us=%s, peer=%d%s\n",
             pfrom->cleanSubVer, pfrom->nVersion,
@@ -4768,7 +4767,7 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv, 
         if (pindex)
             pindex = chainActive.Next(pindex);
         int nLimit = 500;
-        LogPrintf("getblocks %d to %s limit %d from peer=%d\n", (pindex ? pindex->nHeight : -1), hashStop == uint256(0) ? "end" : hashStop.ToString(), nLimit, pfrom->id);
+        LogPrint("net", "getblocks %d to %s limit %d from peer=%d\n", (pindex ? pindex->nHeight : -1), hashStop == uint256(0) ? "end" : hashStop.ToString(), nLimit, pfrom->id);
         for (; pindex; pindex = chainActive.Next(pindex)) {
             if (pindex->GetBlockHash() == hashStop) {
                 LogPrint("net", "  getblocks stopping at %d %s\n", pindex->nHeight, pindex->GetBlockHash().ToString());
@@ -5308,16 +5307,16 @@ int ActiveProtocol()
 {
 
     //  SPORK_14 will be used for future release.
-
+    /*
     if (IsSporkActive(SPORK_14_NEW_PROTOCOL_ENFORCEMENT))
             return MIN_PEER_PROTO_VERSION_AFTER_ENFORCEMENT;
 
+    */
+    // SPORK_15 active.
     
-    // SPORK_15 will be used for future release.
-    /*
     if (IsSporkActive(SPORK_15_NEW_PROTOCOL_ENFORCEMENT_2))
             return MIN_PEER_PROTO_VERSION_AFTER_ENFORCEMENT;
-    */
+    
     
     return MIN_PEER_PROTO_VERSION_BEFORE_ENFORCEMENT;
 

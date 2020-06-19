@@ -1619,12 +1619,21 @@ bool AppInit2(boost::thread_group& threadGroup, CScheduler& scheduler)
     nInstantSendDepth = GetArg("-instantsenddepth", nInstantSendDepth);
     nInstantSendDepth = std::min(std::max(nInstantSendDepth, 0), 60);
 
-    //lite mode disables all Masternode and Privatesend related functionality
+    //lite mode disables all Masternode, Privatesend and staking related functionality
     fLiteMode = GetBoolArg("-litemode", false);
-    if (fMasterNode && fLiteMode) {
-        return InitError("You can not start a masternode in litemode");
-    }
 
+    if (fLiteMode) {
+        if (fMasterNode)
+            return InitError("You can not start a masternode in litemode");        
+        if (GetBoolArg("-staking", false)){
+            mapArgs["-staking"] = std::string("0");
+            LogPrintf("AppInit2 : parameter interaction: litemode is enabled -> setting -staking=0\n");
+        }
+        mnodeman.Clear();
+        budget.Clear();
+        masternodePayments.Clear();
+    }
+    
     LogPrintf("fLiteMode %d\n", fLiteMode);
     LogPrintf("nInstantSendDepth %d\n", nInstantSendDepth);
     LogPrintf("Privatesend rounds %d\n", nPrivatesendRounds);

@@ -414,7 +414,7 @@ void CTxMemPool::removeCoinbaseCollateralSpends(const CCoinsViewCache* pcoins, i
                 break;
             }
             if (coins->vout[txin.prevout.n].nValue == Params().MasternodeCollateral()
-                && nMemPoolHeight - coins->nHeight < Params().COLLATERAL_MATURITY()
+                && Params().nonCollateralMaturity(nMemPoolHeight - coins->nHeight)
                 && nMemPoolHeight > Params().CollateralMaturityEnforcementHeight())
             {
                 LogPrintf("CTxMemPool immature collateral tx removed %s  \n", tx.GetHash().ToString().c_str());

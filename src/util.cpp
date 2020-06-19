@@ -219,6 +219,7 @@ static void DebugPrintInit()
 
 bool LogAcceptCategory(const char* category)
 {
+
     if (category != NULL) {
         if (!fDebug)
             return false;

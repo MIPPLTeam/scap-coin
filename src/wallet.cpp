@@ -1388,7 +1388,7 @@ CAmount CWallet::GetImmatureCollateral() const
     vector<COutput> vCoins;
     pwalletMain->AvailableCoins(vCoins, true, NULL, false, ONLY_MNCOLLATERAL);
     BOOST_FOREACH (const COutput& out, vCoins) {
-        if (out.tx->vout[out.i].nValue == Params().MasternodeCollateral() && Params().COLLATERAL_MATURITY() > out.tx->GetDepthInMainChain(false)
+        if (out.tx->vout[out.i].nValue == Params().MasternodeCollateral() && Params().nonCollateralMaturity(out.tx->GetDepthInMainChain(false))
             && chainActive.Height() > Params().CollateralMaturityEnforcementHeight()) 
             { //exactly
                 nTotal+= out.tx->vout[out.i].nValue;
@@ -1485,7 +1485,7 @@ void CWallet::AvailableCoins(vector<COutput>& vCoins, bool fOnlyConfirmed, const
                     found = pcoin->vout[i].nValue == Params().MasternodeCollateral();
                 } else {
                     if (pcoin->vout[i].nValue == Params().MasternodeCollateral()
-                        && Params().COLLATERAL_MATURITY() > nDepth
+                        && Params().nonCollateralMaturity(nDepth)
                         && chainActive.Height() > Params().CollateralMaturityEnforcementHeight())
                     {
                         //LogPrintf("AvailableCoins collateral: skip %d / %d / %d \n", nDepth, pcoin->vout[i].nValue, chainActive.Height());
@@ -2416,6 +2416,7 @@ bool CWallet::CreateCoinStake(const CKeyStore& keystore, unsigned int nBits, int
 
     CAmount nCredit = 0;
     CScript scriptPubKeyKernel;
+    CScript aggregateScriptPubKeyHashKernel;    
 
     //prevent staking a time that won't be accepted
     if (GetAdjustedTime() <= chainActive.Tip()->nTime)
@@ -2442,7 +2443,7 @@ bool CWallet::CreateCoinStake(const CKeyStore& keystore, unsigned int nBits, int
         nTxNewTime = GetAdjustedTime();
 
         //iterates each utxo inside of CheckStakeKernelHash()
-        if (CheckStakeKernelHash(nBits, block, *pcoin.first, prevoutStake, nTxNewTime, nHashDrift, false, hashProofOfStake, true)) {
+        if (CheckStakeKernelHash(nBits, block, *pcoin.first, prevoutStake, nTxNewTime, nHashDrift, false, hashProofOfStake, GetBoolArg("-printcoinstake", false))) {
             //Double check that this will pass time requirements
             if (nTxNewTime <= chainActive.Tip()->GetMedianTimePast()) {
                 LogPrintf("CreateCoinStake() : kernel found, but it is too far in the past \n");
@@ -2457,17 +2458,26 @@ bool CWallet::CreateCoinStake(const CKeyStore& keystore, unsigned int nBits, int
             txnouttype whichType;
             CScript scriptPubKeyOut;
             scriptPubKeyKernel = pcoin.first->vout[pcoin.second].scriptPubKey;
+            
             if (!Solver(scriptPubKeyKernel, whichType, vSolutions)) {
                 LogPrintf("CreateCoinStake : failed to parse kernel\n");
                 break;
             }
             if (fDebug && GetBoolArg("-printcoinstake", false))
                 LogPrintf("CreateCoinStake : parsed kernel type=%d\n", whichType);
+            
+            if (whichType == TX_NONSTANDARD)
+            {
+                LogPrintf("CreateCoinStake : failed to parse kernel\n");
+                break;
+            }            
+            
             if (whichType != TX_PUBKEY && whichType != TX_PUBKEYHASH) {
                 if (fDebug && GetBoolArg("-printcoinstake", false))
                     LogPrintf("CreateCoinStake : no support for kernel type=%d\n", whichType);
                 break; // only support pay to public key and pay to address
             }
+            
             if (whichType == TX_PUBKEYHASH) // pay to address type
             {
                 //convert to pay to public key type
@@ -2479,21 +2489,35 @@ bool CWallet::CreateCoinStake(const CKeyStore& keystore, unsigned int nBits, int
                 }
 
                 scriptPubKeyOut << key.GetPubKey() << OP_CHECKSIG;
-            } else
-                scriptPubKeyOut = scriptPubKeyKernel;
+                aggregateScriptPubKeyHashKernel = scriptPubKeyKernel;
+                
+            } else if (whichType == TX_PUBKEY)
+            {
+                CKey key;                
+                valtype& vchPubKey = vSolutions[0];
+                CPubKey pubKey(vchPubKey);
+                uint160 hash160(Hash160(vchPubKey));
+                CKeyID pubKeyHash(hash160);
+                if (!keystore.GetKey(pubKeyHash, key))
+                {
+                    LogPrintf("CreateCoinStake : failed to get key for kernel type=%d\n", whichType);
+                    break;  // unable to find corresponding public key
+                }
 
+                if (key.GetPubKey() != pubKey)
+                {
+                    LogPrintf("CreateCoinStake : invalid key for kernel type=%d\n", whichType);
+                    break; // keys mismatch
+                }
+
+                scriptPubKeyOut = scriptPubKeyKernel;
+                aggregateScriptPubKeyHashKernel = CScript() << OP_DUP << OP_HASH160 << ToByteVector(hash160) << OP_EQUALVERIFY << OP_CHECKSIG;
+            }
+            
             txNew.vin.push_back(CTxIn(pcoin.first->GetHash(), pcoin.second));
             nCredit += pcoin.first->vout[pcoin.second].nValue;
             vwtxPrev.push_back(pcoin.first);
             txNew.vout.push_back(CTxOut(0, scriptPubKeyOut));
-
-            //presstab HyperStake - calculate the total size of our new output including the stake reward so that we can use it to decide whether to split the stake outputs
-            const CBlockIndex* pIndex0 = chainActive.Tip();
-            uint64_t nTotalSize = pcoin.first->vout[pcoin.second].nValue + GetBlockValue(pIndex0->nHeight + 1);
-
-            //presstab HyperStake - if MultiSend is set to send in coinstake we will add our outputs here (values asigned further down)
-            if (nTotalSize / 2 > nStakeSplitThreshold * COIN)
-                txNew.vout.push_back(CTxOut(0, scriptPubKeyOut)); //split stake
 
             if (fDebug && GetBoolArg("-printcoinstake", false))
                 LogPrintf("CreateCoinStake : added kernel type=%d\n", whichType);
@@ -2503,9 +2527,30 @@ bool CWallet::CreateCoinStake(const CKeyStore& keystore, unsigned int nBits, int
         if (fKernelFound)
             break; // if kernel is found stop searching
     }
+    
     if (nCredit == 0 || nCredit > nBalance - nReserveBalance)
         return false;
 
+    for(const std::pair<const CWalletTx*,unsigned int> &pcoin : setStakeCoins)
+    {
+        // Attempt to add more inputs
+        // Only add coins of the same key/address as kernel
+        if (txNew.vout.size() == 2 && (pcoin.first->vout[pcoin.second].scriptPubKey == scriptPubKeyKernel || pcoin.first->vout[pcoin.second].scriptPubKey == aggregateScriptPubKeyHashKernel) && pcoin.first->GetHash() != txNew.vin[0].prevout.hash)
+        {
+            // Stop adding more inputs if already too many inputs
+            if (txNew.vin.size() >= GetStakeMaxCombineInputs)
+                break;
+            // Stop adding inputs if reached reserve limit
+            if (nCredit + pcoin.first->vout[pcoin.second].nValue > nBalance - nReserveBalance)
+                break;
+            // Do not add additional significant input
+            if (pcoin.first->vout[pcoin.second].nValue >= GetStakeCombineThreshold)
+                continue;
+            txNew.vin.push_back(CTxIn(pcoin.first->GetHash(), pcoin.second));
+            nCredit += pcoin.first->vout[pcoin.second].nValue;
+            vwtxPrev.push_back(pcoin.first);
+        }
+    }
     // Calculate reward
     CAmount nReward;
     const CBlockIndex* pIndex0 = chainActive.Tip();
@@ -2539,10 +2584,27 @@ bool CWallet::CreateCoinStake(const CKeyStore& keystore, unsigned int nBits, int
         }
     }
 
+    if (nCredit >= GetStakeSplitThreshold || nCredit >= nStakeSplitThreshold * COIN)
+    {
+        for(unsigned int i = 0; i < GetStakeSplitOutputs - 1; i++)
+            txNew.vout.push_back(CTxOut(0, txNew.vout[1].scriptPubKey)); //split stake
+    }
+
+    // Set output amount
+    if (txNew.vout.size() == GetStakeSplitOutputs + 1)
+    {
+        CAmount nValue = (nCredit / GetStakeSplitOutputs / CENT) * CENT;
+        for(unsigned int i = 1; i < GetStakeSplitOutputs; i++)
+            txNew.vout[i].nValue = nValue;
+        txNew.vout[GetStakeSplitOutputs].nValue = nCredit - nValue * (GetStakeSplitOutputs - 1);
+    }
+    else
+        txNew.vout[1].nValue = nCredit;
+    
     //Masternode payment
     FillBlockPayee(txNew, nMinFee, true);
 
-    // Sign
+     // Sign
     int nIn = 0;
     BOOST_FOREACH (const CWalletTx* pcoin, vwtxPrev) {
         if (!SignSignature(*this, *pcoin, txNew, nIn++))
