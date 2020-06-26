@@ -21,8 +21,8 @@ More information at [SafeCapital.io](https://www.SafeCapital.io)
 <tr><td>Masternode Collateral</td><td>1,000.00019 SCAP</td></tr>
 <tr><td>Masternode Collateral Locked</td><td>YES</td></tr>
 <tr><td>Masternode Collateral Time Locked</td><td>One Year</td></tr>
-<tr><td>P2P port</td><td>47002</td></tr>
-<tr><td>RPC port</td><td>47003</td></tr>
+<tr><td>P2P port</td><td>33999</td></tr>
+<tr><td>RPC port</td><td>33998</td></tr>
 <tr><td>Max Coin Supply</td><td>6,600,000 SCAP</td></tr>
 </table>
 

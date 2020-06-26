@@ -209,10 +209,10 @@ QT_TRANSLATE_NOOP("safecapital-core", ""
 QT_TRANSLATE_NOOP("safecapital-core", ""
 "You must specify a masternodeprivkey in the configuration. Please see "
 "documentation for help."),
-QT_TRANSLATE_NOOP("safecapital-core", "(47002 could be used only on mainnet)"),
+QT_TRANSLATE_NOOP("safecapital-core", "(33999 could be used only on mainnet)"),
 QT_TRANSLATE_NOOP("safecapital-core", "(default: %s)"),
 QT_TRANSLATE_NOOP("safecapital-core", "(default: 1)"),
-QT_TRANSLATE_NOOP("safecapital-core", "(must be 47002 for mainnet)"),
+QT_TRANSLATE_NOOP("safecapital-core", "(must be 33999 for mainnet)"),
 QT_TRANSLATE_NOOP("safecapital-core", "<category> can be:"),
 QT_TRANSLATE_NOOP("safecapital-core", "Accept command line and JSON-RPC commands"),
 QT_TRANSLATE_NOOP("safecapital-core", "Accept connections from outside (default: 1 if no -proxy or -connect)"),

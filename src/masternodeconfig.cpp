@@ -25,7 +25,7 @@ bool CMasternodeConfig::read(std::string& strErr)
         if (configFile != NULL) {
             std::string strHeader = "# Masternode config file\n"
                                     "# Format: alias IP:port masternodeprivkey collateral_output_txid collateral_output_index\n"
-                                    "# Example: mn1 127.0.0.1:47002 5hoSSudbR66dS5FpouA4xbmk48uGjuZG9LRP1e4YgYXMHVdDyCP 3bcd3c84c84f87eaa86e4e56834c92927a07f9e18718810b92e0d0324456a67c 0\n";
+                                    "# Example: mn1 127.0.0.1:33999 5hoSSudbR66dS5FpouA4xbmk48uGjuZG9LRP1e4YgYXMHVdDyCP 3bcd3c84c84f87eaa86e4e56834c92927a07f9e18718810b92e0d0324456a67c 0\n";
             fwrite(strHeader.c_str(), std::strlen(strHeader.c_str()), 1, configFile);
             fclose(configFile);
         }
@@ -66,17 +66,17 @@ bool CMasternodeConfig::read(std::string& strErr)
         }
 		
         if (Params().NetworkID() == CBaseChainParams::MAIN) {
-            if (port != 47002) {
+            if (port != 33999) {
                 strErr = _("Invalid port detected in masternode.conf") + "\n" +
                          strprintf(_("Line: %d"), linenumber) + "\n\"" + line + "\"" + "\n" +
-                         _("(must be 47002 for mainnet)");
+                         _("(must be 33999 for mainnet)");
                 streamConfig.close();
                 return false;
             }
-        } else if (port == 47002) {
+        } else if (port == 33999) {
             strErr = _("Invalid port detected in masternode.conf") + "\n" +
                      strprintf(_("Line: %d"), linenumber) + "\n\"" + line + "\"" + "\n" +
-                     _("(47002 could be used only on mainnet)");
+                     _("(33999 could be used only on mainnet)");
             streamConfig.close();
             return false;
         }

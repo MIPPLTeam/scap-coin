@@ -3538,8 +3538,8 @@ https://www.transifex.com/safecapital/scapcore-project-translations</translation
         <translation>Você deve especificar uma masternodeprivkey na configuração. Favor verificar o manual para obter ajuda.</translation>
     </message>
     <message>
-        <source>(47002 could be used only on mainnet)</source>
-        <translation>(47002 could be used only on mainnet)</translation>
+        <source>(33999 could be used only on mainnet)</source>
+        <translation>(33999 could be used only on mainnet)</translation>
     </message>
     <message>
         <source>(default: %s)</source>
@@ -3550,8 +3550,8 @@ https://www.transifex.com/safecapital/scapcore-project-translations</translation
         <translation>(padrão: 1)</translation>
     </message>
     <message>
-        <source>(must be 47002 for mainnet)</source>
-        <translation>(deve ser 47002 para mainnet)</translation>
+        <source>(must be 33999 for mainnet)</source>
+        <translation>(deve ser 33999 para mainnet)</translation>
     </message>
     <message>
         <source>Accept connections from outside (default: 1 if no -proxy or -connect)</source>

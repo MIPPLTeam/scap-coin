@@ -174,7 +174,7 @@ Value addnode(const Array& params, bool fHelp)
             "1. \"node\"     (string, required) The node (see getpeerinfo for nodes)\n"
             "2. \"command\"  (string, required) 'add' to add a node to the list, 'remove' to remove a node from the list, 'onetry' to try a connection to the node once\n"
             "\nExamples:\n" +
-            HelpExampleCli("addnode", "\"192.168.0.6:47002\" \"onetry\"") + HelpExampleRpc("addnode", "\"192.168.0.6:47002\", \"onetry\""));
+            HelpExampleCli("addnode", "\"192.168.0.6:33999\" \"onetry\"") + HelpExampleRpc("addnode", "\"192.168.0.6:33999\", \"onetry\""));
 
     string strNode = params[0].get_str();
 
@@ -222,7 +222,7 @@ Value getaddednodeinfo(const Array& params, bool fHelp)
             "    \"connected\" : true|false,          (boolean) If connected\n"
             "    \"addresses\" : [\n"
             "       {\n"
-            "         \"address\" : \"192.168.0.201:47002\",  (string) The safecapital server host and port\n"
+            "         \"address\" : \"192.168.0.201:33999\",  (string) The safecapital server host and port\n"
             "         \"connected\" : \"outbound\"           (string) connection, inbound or outbound\n"
             "       }\n"
             "       ,...\n"
@@ -418,8 +418,8 @@ Value disconnectnode(const Array& params, bool fHelp)
             "\nArguments:\n"
             "1. \"node\"     (string, required) The node (see getpeerinfo for nodes)\n"
             "\nExamples:\n"
-            + HelpExampleCli("disconnectnode", "\"192.168.0.6:47002\"")
-            + HelpExampleRpc("disconnectnode", "\"192.168.0.6:47002\"")
+            + HelpExampleCli("disconnectnode", "\"192.168.0.6:33999\"")
+            + HelpExampleRpc("disconnectnode", "\"192.168.0.6:33999\"")
         );
     CNode* pNode = FindNode(params[0].get_str());
     if (pNode == NULL)
