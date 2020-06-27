@@ -100,7 +100,7 @@ public:
         nLastPOWBlock = 210;
         nMaturity = 100;
         nCollateralMaturity = 525600;
-        nCollateralMaturityEnforcementHeight = 1000;
+        nCollateralMaturityEnforcementHeight = 1000000;
         nCollateralMaturityTimeWindow = 60 * 24 * 5;
         nMasternodeCountDrift = 20;
         nModifierUpdateBlock = 1;
