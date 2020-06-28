@@ -100,6 +100,11 @@ void MasternodeList::StartAlias(std::string strAlias)
             std::string strError;
             CMasternodeBroadcast mnb;
 
+			if (!masternodeSync.IsMasternodeListSynced())	{
+				strStatusHtml += "<br>Masternode list must be synced first. Please try later.";
+				break;
+			}
+
             bool fSuccess = CMasternodeBroadcast::Create(mne.getIp(), mne.getPrivKey(), mne.getTxHash(), mne.getOutputIndex(), strError, mnb);
 
             if (fSuccess) {
@@ -126,6 +131,13 @@ void MasternodeList::StartAll(std::string strCommand)
     int nCountSuccessful = 0;
     int nCountFailed = 0;
     std::string strFailedHtml;
+
+	if (!masternodeSync.IsMasternodeListSynced())	{
+		QMessageBox msg;
+		msg.setText("Masternode list must be synced first. Please try later.");
+		msg.exec();
+		return;
+	}
 
     BOOST_FOREACH (CMasternodeConfig::CMasternodeEntry mne, masternodeConfig.getEntries()) {
         std::string strError;
