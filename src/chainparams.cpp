@@ -102,6 +102,7 @@ public:
         nCollateralMaturity = 525600;
         nCollateralMaturityEnforcementHeight = 1000000;
         nCollateralMaturityTimeWindow = 60 * 24 * 5;
+        nMasternodeMaxCount = 8;		// maximum number of masternodes allowed
         nMasternodeCountDrift = 20;
         nModifierUpdateBlock = 1;
         nMaxMoneyOut = 10100000 * COIN;
@@ -196,6 +197,7 @@ public:
         nCollateralMaturity = 300;
         nCollateralMaturityEnforcementHeight = 1000;
         nCollateralMaturityTimeWindow = 300;
+        nMasternodeMaxCount = 8;		// maximum number of masternodes allowed
         nMasternodeCountDrift = 4;
         nModifierUpdateBlock = 1; //approx Mon, 17 Apr 2017 04:00:00 GMT
         nMaxMoneyOut = 43199500 * COIN;

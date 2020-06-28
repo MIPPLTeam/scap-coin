@@ -77,6 +77,7 @@ public:
     int COINBASE_MATURITY() const { return nMaturity; }
     int COLLATERAL_MATURITY() const { return nCollateralMaturity; }
     int CollateralMaturityEnforcementHeight() const { return nCollateralMaturityEnforcementHeight; }
+    int MasternodeMaxCount() const { return nMasternodeMaxCount; }
     int ModifierUpgradeBlock() const { return nModifierUpdateBlock; }
     CAmount MaxMoneyOut() const { return nMaxMoneyOut; }
 	CAmount MasternodeCollateral() const { return nMasternodeCollateral * COIN; }
@@ -125,6 +126,7 @@ protected:
     int nCollateralMaturity;
     int nCollateralMaturityEnforcementHeight;
 	int nCollateralMaturityTimeWindow;
+	int nMasternodeMaxCount;
     int nModifierUpdateBlock;
     CAmount nMaxMoneyOut;
 	double nMasternodeCollateral;
