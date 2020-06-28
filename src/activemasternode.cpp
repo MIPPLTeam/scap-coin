@@ -210,6 +210,12 @@ bool CActiveMasternode::Register(std::string strService, std::string strKeyMaste
     CPubKey pubKeyMasternode;
     CKey keyMasternode;
 
+    if (mnodeman.size()>=Params().MasternodeMaxCount())	{
+        errorMessage = strprintf("Maximum number of allowed masternodes reached");
+        LogPrintf("CActiveMasternode::Register() - %s\n", errorMessage);
+        return false;
+	}
+
     //need correct blocks to send ping
     if (!masternodeSync.IsBlockchainSynced()) {
         errorMessage = GetStatus();
