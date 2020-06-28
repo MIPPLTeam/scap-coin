@@ -435,9 +435,17 @@ bool CMasternodeBroadcast::Create(CTxIn txin, CService service, CKey keyCollater
     // wait for reindex and/or import to finish
     if (fImporting || fReindex) return false;
 
-    LogPrint("masternode", "CMasternodeBroadcast::Create -- pubKeyCollateralAddressNew = %s, pubKeyMasternodeNew.GetID() = %s\n",
+    LogPrint("masternode", "CMasternodeBroadcast::Create -- [%d of %d] pubKeyCollateralAddressNew = %s, pubKeyMasternodeNew.GetID() = %s\n",
+        mnodeman.size(), Params().MasternodeMaxCount(),
         CBitcoinAddress(pubKeyCollateralAddressNew.GetID()).ToString(),
         pubKeyMasternodeNew.GetID().ToString());
+
+    if (mnodeman.size()>=Params().MasternodeMaxCount())	{
+        strErrorRet = strprintf("Maximum number of allowed masternodes reached");
+        LogPrintf("CMasternodeBroadcast::Create -- %s\n", strErrorRet);
+        mnbRet = CMasternodeBroadcast();
+        return false;
+	}
 
     CMasternodePing mnp(txin);
     if (!mnp.Sign(keyMasternodeNew, pubKeyMasternodeNew)) {
