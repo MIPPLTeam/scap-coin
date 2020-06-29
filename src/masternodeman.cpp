@@ -735,7 +735,7 @@ void CMasternodeMan::ProcessMessage(CNode* pfrom, std::string& strCommand, CData
         vRecv >> mnb;
 
         // refuse mnbs from new MNs, allow from existing ones only
-        if (mnodeman.Find(mnb.vin)==NULL && mnodeman.size()>=Params().MasternodeMaxCount())	{
+        if (mnodeman.Find(mnb.vin)==NULL && mnodeman.CountEnabled()>=Params().MasternodeMaxCount())	{
             LogPrintf("mnb - Maximum number of Masternodes reached\n");
             Misbehaving(pfrom->GetId(), 1);
             return;

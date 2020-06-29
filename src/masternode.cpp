@@ -440,7 +440,7 @@ bool CMasternodeBroadcast::Create(CTxIn txin, CService service, CKey keyCollater
         CBitcoinAddress(pubKeyCollateralAddressNew.GetID()).ToString(),
         pubKeyMasternodeNew.GetID().ToString());
 
-    if (mnodeman.Find(txin)==NULL && mnodeman.size()>=Params().MasternodeMaxCount())	{
+    if (mnodeman.Find(txin)==NULL && mnodeman.CountEnabled()>=Params().MasternodeMaxCount())	{
         strErrorRet = "Maximum number of allowed masternodes reached";
         LogPrintf("CMasternodeBroadcast::Create -- %s\n", strErrorRet);
         mnbRet = CMasternodeBroadcast();

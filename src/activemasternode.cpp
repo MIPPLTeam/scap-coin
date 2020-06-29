@@ -229,7 +229,7 @@ bool CActiveMasternode::Register(std::string strService, std::string strKeyMaste
         return false;
     }
 
-    if (mnodeman.Find(vin)==NULL && mnodeman.size()>=Params().MasternodeMaxCount())	{
+    if (mnodeman.Find(vin)==NULL && mnodeman.CountEnabled()>=Params().MasternodeMaxCount())	{
         errorMessage = "Maximum number of allowed masternodes reached";
         LogPrintf("CActiveMasternode::Register() - %s\n", errorMessage);
         return false;
